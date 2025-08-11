@@ -1,6 +1,6 @@
 export const ADMIN = {
   email: "admin@example.com",
-  password: "Admin@123",
+  password: "admin@123",
 } as const;
 
 export function isAuthed(): boolean {

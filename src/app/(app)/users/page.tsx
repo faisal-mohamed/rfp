@@ -88,6 +88,11 @@ export default function UsersPage() {
     }
   };
 
+  // Handle view user
+  const handleViewUser = (userId: string) => {
+    router.push(`/users/${userId}`);
+  };
+
   // Handle edit user
   const handleEditUser = (user: User) => {
     setEditingUser(user);
@@ -177,7 +182,7 @@ export default function UsersPage() {
 
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -204,8 +209,8 @@ export default function UsersPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Active Users</p>
-                <p className="text-2xl font-bold text-slate-900">{stats.activeUsers}</p>
+                <p className="text-sm font-medium text-slate-600">Admins</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.roleBreakdown.ADMIN || 0}</p>
               </div>
             </div>
           </div>
@@ -220,8 +225,8 @@ export default function UsersPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Inactive Users</p>
-                <p className="text-2xl font-bold text-slate-900">{stats.inactiveUsers}</p>
+                <p className="text-sm font-medium text-slate-600">Editors</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.roleBreakdown.EDITOR || 0}</p>
               </div>
             </div>
           </div>
@@ -236,12 +241,28 @@ export default function UsersPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-slate-600">Recent (7 days)</p>
-                <p className="text-2xl font-bold text-slate-900">{stats.recentUsers}</p>
+                <p className="text-sm font-medium text-slate-600">Approvers</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.roleBreakdown.APPROVER || 0}</p>
               </div>
             </div>
           </div>
-        </div>
+          {/* Viewer Users */}
+          <div className="bg-white/90 backdrop-blur-xl border border-white/30 rounded-xl shadow-lg p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-slate-600">Viewers</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.roleBreakdown.VIEWER || 0}</p>
+              </div>
+            </div>
+          </div>        </div>
       )}
 
       {/* Filters */}
@@ -303,6 +324,7 @@ export default function UsersPage() {
       <UserTable
         users={users}
         isLoading={isLoading}
+        onViewUser={handleViewUser}
         onEditUser={handleEditUser}
         onDeleteUser={handleDeleteUser}
         onRefresh={fetchUsers}

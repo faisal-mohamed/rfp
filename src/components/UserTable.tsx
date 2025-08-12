@@ -23,6 +23,7 @@ interface User {
 interface UserTableProps {
   users: User[];
   isLoading: boolean;
+  onViewUser: (userId: string) => void;
   onEditUser: (user: User) => void;
   onDeleteUser: (userId: string) => void;
   onRefresh: () => void;
@@ -36,8 +37,9 @@ const ROLE_COLORS = {
 };
 
 // Dropdown Menu Component
-function ActionDropdown({ user, onEdit, onDelete }: {
+function ActionDropdown({ user, onView, onEdit, onDelete }: {
   user: User;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -71,6 +73,20 @@ function ActionDropdown({ user, onEdit, onDelete }: {
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
           <button
             onClick={() => {
+              onView();
+              setIsOpen(false);
+            }}
+            className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2"
+          >
+            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>View Details</span>
+          </button>
+
+          <button
+            onClick={() => {
               onEdit();
               setIsOpen(false);
             }}
@@ -102,7 +118,7 @@ function ActionDropdown({ user, onEdit, onDelete }: {
   );
 }
 
-export default function UserTable({ users, isLoading, onEditUser, onDeleteUser, onRefresh }: UserTableProps) {
+export default function UserTable({ users, isLoading, onViewUser, onEditUser, onDeleteUser, onRefresh }: UserTableProps) {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [sortField, setSortField] = useState<keyof User>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -266,22 +282,8 @@ export default function UserTable({ users, isLoading, onEditUser, onDeleteUser, 
                     )}
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100"
-                  onClick={() => handleSort('lastLogin')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Last Login</span>
-                    {sortField === 'lastLogin' && (
-                      <svg className={`w-4 h-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </div>
-                </th>
+            
+            
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100"
                   onClick={() => handleSort('createdAt')}
@@ -338,27 +340,15 @@ export default function UserTable({ users, isLoading, onEditUser, onDeleteUser, 
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      user.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                        user.isActive ? 'bg-green-400' : 'bg-red-400'
-                      }`}></span>
-                      {user.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                    {formatLastLogin(user.lastLogin)}
-                  </td>
+                 
+              
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     {formatDate(user.createdAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <ActionDropdown
                       user={user}
+                      onView={() => onViewUser(user.id)}
                       onEdit={() => onEditUser(user)}
                       onDelete={() => setConfirmDelete(user)}
                     />

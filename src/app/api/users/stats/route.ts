@@ -14,34 +14,15 @@ export async function GET(request: NextRequest) {
 
     const [
       totalUsers,
-      activeUsers,
-      inactiveUsers,
-      roleStats,
-      recentUsers
+      roleStats
     ] = await Promise.all([
       // Total users
       prisma.user.count(),
       
-      // Active users
-      prisma.user.count({ where: { isActive: true } }),
-      
-      // Inactive users
-      prisma.user.count({ where: { isActive: false } }),
-      
       // Users by role
       prisma.user.groupBy({
         by: ['role'],
-        _count: { role: true },
-        where: { isActive: true }
-      }),
-      
-      // Recent users (last 7 days)
-      prisma.user.count({
-        where: {
-          createdAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          }
-        }
+        _count: { role: true }
       })
     ]);
 
@@ -61,9 +42,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       totalUsers,
-      activeUsers,
-      inactiveUsers,
-      recentUsers,
       roleBreakdown
     });
 

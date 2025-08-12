@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,11 +19,25 @@ export default function LoginPage() {
     setError(null);
     await new Promise((r) => setTimeout(r, 700));
 
-    const ok = login(email, password);
-    if (ok) router.push("/dashboard");
-    else setError("Invalid credentials. Please try again.");
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    setIsLoading(false);
+      if (result?.error) {
+        setError("Invalid credentials. Please try again.");
+      } else {
+        // Refresh session and redirect
+        await getSession();
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      setError("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -180,7 +194,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Remember me and forgot password */}
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <label className="flex items-center space-x-3 text-sm text-slate-600 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -196,7 +210,7 @@ export default function LoginPage() {
                   >
                     Forgot password?
                   </button>
-                </div>
+                </div> */}
 
                 {/* Enhanced Submit Button */}
                 <div className="relative">
@@ -223,8 +237,7 @@ export default function LoginPage() {
                 </div>
               </form>
 
-              {/* Enhanced Demo Credentials */}
-     
+              
             </div>
           </div>
         </div>

@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User management models
+enum UserRole {
+  ADMIN
+  EDITOR
+  APPROVER
+  VIEWER
+}
+
+enum UserType {
+  ADMIN    // System admins who can create users
+  USER     // Regular users created by admins
+}
+
+model User {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String    @unique
+  password      String    // Hashed password
+  role          UserRole  @default(VIEWER)
+  userType      UserType  @default(USER)
+  isActive      Boolean   @default(true)
+  
+  // Audit fields
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  createdBy     String?   // ID of admin who created this user
+  lastLogin     DateTime?
+  
+  // Relations
+  createdUsers  User[]    @relation("UserCreatedBy")
+  creator       User?     @relation("UserCreatedBy", fields: [createdBy], references: [id])
+  
+  // Future RBAC relations (empty for now)
+  // permissions   UserPermission[]
+  // auditLogs     AuditLog[]
+}
+
+// Future RBAC models (commented out for now)
+/*
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  
+  userPermissions UserPermission[]
+}
+
+model UserPermission {
+  id           String @id @default(cuid())
+  userId       String
+  permissionId String
+  
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, permissionId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  resource  String?
+  details   Json?
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id])
+}
+*/

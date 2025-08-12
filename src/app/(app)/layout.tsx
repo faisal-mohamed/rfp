@@ -1,25 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isAuthed } from "@/lib/auth";
+import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const [authed, setAuthed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const ok = isAuthed();
-    setAuthed(ok);
-    if (!ok) {
+    if (status === "loading") return; // Still loading
+    
+    if (!session) {
       router.replace("/login");
     }
-  }, [router, pathname]);
+  }, [session, status, router, pathname]);
 
-  if (!authed) {
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
     return null;
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { NavItem } from "./NavItem";
-import { logout } from "@/lib/auth";
+import { signOut, useSession } from "next-auth/react";
 import { useCallback } from "react";
 
 type SidebarProps = {
@@ -10,9 +10,12 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { data: session } = useSession();
   const handleLogout = useCallback(() => {
-    logout();
+    signOut({ callbackUrl: "/login" });
   }, []);
+
+  const isAdmin = session?.user?.userType === 'ADMIN';
 
   return (
     <>
@@ -79,16 +82,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onClick={onClose} 
               />
               
-              <NavItem 
-                href="/users" 
-                icon={
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                } 
-                label="Users" 
-                onClick={onClose} 
-              />
+              {isAdmin && (
+                <NavItem 
+                  href="/users" 
+                  icon={
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  } 
+                  label="Users" 
+                  onClick={onClose} 
+                />
+              )}
             </nav>
 
             {/* Enhanced Logout Button */}
@@ -116,3 +121,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     </>
   );
 }
+
+
+
